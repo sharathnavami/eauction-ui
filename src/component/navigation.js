@@ -14,7 +14,10 @@ export default function Navigation(props) {
 
     const logout=()=>{
         deleteToken();
+        localStorage.removeItem('user_type');
     }
+
+    console.log(localStorage.getItem('user_type'));
 
     return (
         <Navbar bg="light" expand="lg">
@@ -24,9 +27,9 @@ export default function Navigation(props) {
                 <Navbar.Collapse id="basic-navbar-nav">
                     <Nav className="me-auto">
                         <Nav.Link href="/">Dashboard</Nav.Link>
-                        <Nav.Link href="/seller">Seller</Nav.Link>
-                        <Nav.Link href="/buyer">Buyer</Nav.Link>
-                        <Nav.Link href="/admin">Admin</Nav.Link>
+                        { (localStorage.getItem('user_type')!==null && localStorage.getItem('user_type') ==='seller')?<Nav.Link href="/seller">Seller</Nav.Link>:<div></div> }
+                        { (localStorage.getItem('user_type')!==null && localStorage.getItem('user_type') ==='buyer')?<Nav.Link href="/buyer">Buyer</Nav.Link>:<div></div> }
+                        { (localStorage.getItem('user_type')!==null && localStorage.getItem('user_type') ==='admin')?<Nav.Link href="/admin">Admin</Nav.Link>:<div></div> }
                     </Nav>
                 </Navbar.Collapse>
             </Container>

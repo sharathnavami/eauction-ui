@@ -8,6 +8,10 @@ export default function SellerAddPopup() {
   const handleClose = () => setShow(false);
   const handleShow = () => setShow(true);
 
+  const properties ={
+    close:setShow
+  }
+
   return (
     <>
       <Button variant="primary" onClick={handleShow}>
@@ -24,14 +28,8 @@ export default function SellerAddPopup() {
           <Modal.Title>Bid Product</Modal.Title>
         </Modal.Header>
         <Modal.Body>
-          <AddProduct></AddProduct>
+          <AddProduct data={handleClose}></AddProduct>
         </Modal.Body>
-        <Modal.Footer>
-          <Button variant="secondary" onClick={handleClose}>
-            Close
-          </Button>
-          <Button variant="primary">Add</Button>
-        </Modal.Footer>
       </Modal>
     </>
   );

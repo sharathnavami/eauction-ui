@@ -1,16 +1,44 @@
 import { useState } from "react";
 import { Button, Modal } from "react-bootstrap";
-import AdminAddProduct from "./adminAddProduct";
+import AdminAddProduct from "./addProduct";
+import AddUser from "./addUsers";
+import axios from 'axios';
 
 export default function AdminPopup() {
     const [show, setShow] = useState(false);
     const [addUser, setAddUser] = useState(false);
+    const [sellerEmail, setSellerEmail] = useState([]);
   
-    const handleClose = () => setShow(false);
-    const handleShow = () => setShow(true);
-
+    const handleClose = () => {
+      setShow(false);
+    }
+    const handleShow = () => {
+      getSellerEmail();
+    }
     const handleAddUserClose = () => setAddUser(false);
     const handleAddUserShow = () => setAddUser(true);
+
+    function getSellerEmail() {
+      axios.defaults.headers.common['Authorization'] = `Bearer ${JSON.stringify(localStorage.getItem('token')).replaceAll('"','').replaceAll('\\','')}`;
+      axios.defaults.headers.post['Content-Type'] ='application/json';
+      axios.defaults.headers.post['Access-Control-Allow-Origin'] = '*';
+      axios.defaults.headers.post['Access-Control-Allow-Methods'] = 'GET, POST, PATCH, PUT, DELETE, OPTIONS';
+      axios.defaults.headers.post['Access-Control-Allow-Headers'] = 'Origin, Content-Type, X-Auth-Token';
+      axios.get('http://localhost:8083/e-auction/api/v1/admin/seller-details')
+        .then(response => {
+          console.log("response==" + JSON.stringify(response));
+          setSellerEmail(response.data);
+          setShow(true);
+        })
+        .catch((err) => {
+          let message = typeof err.response !== "undefined" ? err.response.data.message : err.message;
+          console.warn("error", message);
+        });
+    }
+    const addProductProperties={
+      sellerEmail:sellerEmail,
+      handleClose:handleClose
+    }
   
     return (
       <>
@@ -35,14 +63,8 @@ export default function AdminPopup() {
             <Modal.Title>Add Product</Modal.Title>
           </Modal.Header>
           <Modal.Body>
-            <AdminAddProduct/>
+            <AdminAddProduct data={addProductProperties}/>
           </Modal.Body>
-          <Modal.Footer>
-            <Button variant="secondary" onClick={handleClose}>
-              Close
-            </Button>
-            <Button variant="primary">Add</Button>
-          </Modal.Footer>
         </Modal>
 
 
@@ -53,17 +75,11 @@ export default function AdminPopup() {
           keyboard={false}
         >
           <Modal.Header closeButton>
-            <Modal.Title>Add Product</Modal.Title>
+            <Modal.Title>Add User</Modal.Title>
           </Modal.Header>
           <Modal.Body>
-            <AdminAddProduct/>
+            <AddUser data={handleAddUserClose}/>
           </Modal.Body>
-          <Modal.Footer>
-            <Button variant="secondary" onClick={handleAddUserClose}>
-              Close
-            </Button>
-            <Button variant="primary">Add</Button>
-          </Modal.Footer>
         </Modal>
         </div>
       </>

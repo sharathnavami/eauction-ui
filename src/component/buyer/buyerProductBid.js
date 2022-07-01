@@ -3,9 +3,9 @@ import { Button, FormControl, InputGroup } from "react-bootstrap";
 import axios from 'axios';
 import { Snackbar } from "@material-ui/core";
 
-export default function BuyerBidUpdate(props) {
+export default function BuyerProductBid(props) {
     console.log(props);
-    const [updatedBidAmount, setUpdatedBidAmount] = useState();
+    const [bidAmount, setBidAmount] = useState();
     const [errorMessage, setErrorMessage] = useState();
     const [open, setOpen] = React.useState(false);
     const handleToClose = (event, reason) => {
@@ -13,17 +13,18 @@ export default function BuyerBidUpdate(props) {
         setOpen(false);
     };
 
+    function close() {
+        props.data.updateBid(undefined);
+    }
+
     function submit() {
-        console.log("updatedBidAmount:" + updatedBidAmount);
-        if(updatedBidAmount<props.data.selectRow?.startingPrice){
+        console.log("searchInput:" + bidAmount);
+        if(bidAmount<props.data.selectProductRow?.startingPrice){
             setErrorMessage("Amount should be greater than Starting price")
             setOpen(true);
         }else{
             updateBidAmount();
-            }
         }
-    function close() {
-        props.data.updateRow(undefined);
     }
 
     function updateBidAmount() {
@@ -32,18 +33,21 @@ export default function BuyerBidUpdate(props) {
         axios.defaults.headers.post['Access-Control-Allow-Origin'] = '*';
         axios.defaults.headers.post['Access-Control-Allow-Methods'] = 'GET, POST, PATCH, PUT, DELETE, OPTIONS';
         axios.defaults.headers.post['Access-Control-Allow-Headers'] = 'Origin, Content-Type, X-Auth-Token';
-        axios.put(`http://localhost:8082/e-auction/api/v1/buyer/update-bid/${props.data.selectRow.productId}/${props.data.selectRow.buyerEmail}/${updatedBidAmount}`)
+        axios.post('http://localhost:8082/e-auction/api/v1/buyer/place-bid-buyer', {
+            "amount": bidAmount,
+            "productId": props.data.selectProductRow?.id,
+            "productName": props.data.selectProductRow?.name
+        })
             .then(res => { 
-                console.log(res);
+                console.log(res) 
                 props.data?.refreshSearch();
-                setErrorMessage("Updated Bid successfully");
+                setErrorMessage("Added Bid successfully");
                 setOpen(true);
                 close();
-
             })
             .catch(err => {
                 console.log(err.response.data);
-                setErrorMessage(err.response.data.error);
+                setErrorMessage(err.response.data.message);
                 console.log(errorMessage);
                 setOpen(true);
             })
@@ -51,20 +55,21 @@ export default function BuyerBidUpdate(props) {
 
     return (
         <div>
-            <h3>Update bid Amount for product: {props.data?.productName}</h3>
+            <h3>Bid for product: {props.data?.name}</h3>
             <div className="row">
                 <div className="col-md-6">
                     <InputGroup className="mb-3">
-                        <InputGroup.Text id="inputGroup-sizing-default">Current Bid : {props.data.selectRow?.amount}</InputGroup.Text>
-                        <InputGroup.Text id="inputGroup-sizing-default">Enter New Bid Amount : </InputGroup.Text>
+                        <InputGroup.Text id="inputGroup-sizing-default">Starting Bid : {props.data.selectProductRow?.startingPrice}</InputGroup.Text>
+                        <InputGroup.Text id="inputGroup-sizing-default">Enter Bid Amount : </InputGroup.Text>
                         <FormControl
                             aria-label="Default"
                             aria-describedby="inputGroup-sizing-default"
-                            onChange={e => setUpdatedBidAmount(e.target.value)}
+                            onChange={e => setBidAmount(e.target.value)}
                         />
                         <Button variant="primary" onClick={submit}>
-                            Update
+                            Submit
                         </Button>
+                        <br />
                         <Snackbar
                             anchorOrigin={{
                                 horizontal: "center",

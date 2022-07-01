@@ -6,7 +6,10 @@ import { InputGroup } from 'react-bootstrap';
 import axios from 'axios';
 import { Snackbar } from '@material-ui/core';
 
-export default function AddProduct(props) {
+export default function AdminAddProduct(props) {
+
+  const [validated, setValidated] = useState(false);
+  const [form, setForm] = useState({})
 
   const [errorMessage, setErrorMessage] = useState();
   const [open, setOpen] = React.useState(false);
@@ -14,10 +17,6 @@ export default function AddProduct(props) {
     if ("clickaway" === reason) return;
     setOpen(false);
   };
-
-  const [validated, setValidated] = useState(false);
-
-  const [form, setForm] = useState({})
 
   const setField = (field, value) => {
     setForm({
@@ -28,6 +27,8 @@ export default function AddProduct(props) {
 
   const handleSubmit = (event) => {
     const form = event.currentTarget;
+    console.log(form);
+    console.log(form.checkValidity());
     setValidated(true);
     if (!form.checkValidity()) {
       event.preventDefault();
@@ -43,25 +44,43 @@ export default function AddProduct(props) {
     axios.defaults.headers.post['Access-Control-Allow-Origin'] = '*';
     axios.defaults.headers.post['Access-Control-Allow-Methods'] = 'GET, POST, PATCH, PUT, DELETE, OPTIONS';
     axios.defaults.headers.post['Access-Control-Allow-Headers'] = 'Origin, Content-Type, X-Auth-Token';
-    axios.post('http://localhost:8081/e-auction/api/v1/seller/add-product-seller', form)
+    axios.post('http://localhost:8081/e-auction/api/v1/seller/add-product-admin', form)
       .then(response => {
         console.log("response==" + response);
         setErrorMessage("Product Added Successfully");
         setOpen(true);
-        props.data();
+        props.data.handleClose()
       })
       .catch((err) => {
-        let message = typeof err.response !== "undefined" ? err.response.data : err.message;
-        console.warn(err);
+        let message = typeof err.response !== "undefined" ? err.response.data.message : err.message;
+        console.warn("error", message);
         setErrorMessage(err.response.data);
         setOpen(true);
-
       });
   }
 
   return (
     <div >
       <Form noValidate validated={validated} onSubmit={handleSubmit}>
+        <Form.Group controlId="email">
+          <Form.Label>Email</Form.Label>
+          <InputGroup hasValidation>
+            <Form.Control
+              as="select"
+              onChange={e => setField('sellerEmailId', e.target.value)}
+              placeholder="Select Seller Email" required>
+              <option value=""></option>
+              {props.data.sellerEmail?.map((item) => {
+                return (
+                  <option value={item}>{item}</option>
+                )
+              })}
+            </Form.Control>
+            <Form.Control.Feedback type="invalid">
+              Please provide valid email address.
+            </Form.Control.Feedback>
+          </InputGroup>
+        </Form.Group>
         <Form.Group controlId="productName">
           <Form.Label>Product Name</Form.Label>
           <InputGroup hasValidation>
@@ -75,12 +94,12 @@ export default function AddProduct(props) {
         <Form.Group controlId="shortDescription">
           <Form.Label>Short Description</Form.Label>
           <Form.Control type="text" onChange={e => setField('description', e.target.value)}
-            placeholder="Enter your Short Description" required />
+            placeholder="Enter your Short Description" />
         </Form.Group>
         <Form.Group controlId="detailedDescription">
           <Form.Label>Detailed Description</Form.Label>
           <Form.Control type="text" onChange={e => setField('detailDesc', e.target.value)}
-            placeholder="Enter your Detailed Description" required />
+            placeholder="Enter your Detailed Description" />
         </Form.Group>
         <Form.Group controlId="category">
           <Form.Label>Category</Form.Label>
@@ -97,12 +116,12 @@ export default function AddProduct(props) {
         <Form.Group controlId="startingPrice">
           <Form.Label>Starting Price</Form.Label>
           <Form.Control type="number" onChange={e => setField('startingPrice', e.target.value)}
-            placeholder="Enter your Starting Price" required />
+            placeholder="Enter your Starting Price" />
         </Form.Group>
         <Form.Group controlId="bidEndDate">
           <Form.Label>Bid End Date</Form.Label>
           <Form.Control type="date" onChange={e => setField('endDate', e.target.value)}
-            placeholder="Enter Bid End Date" required />
+            placeholder="Enter your Starting Price" />
         </Form.Group>
         <div class="row mt-2">
           <div class="d-flex justify-content-end float-right">
@@ -123,5 +142,6 @@ export default function AddProduct(props) {
         </div>
       </Form>
     </div>
+
   );
 }
